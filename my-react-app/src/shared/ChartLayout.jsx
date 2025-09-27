@@ -110,7 +110,7 @@ export default function ChartLayout() {
       <header className="bg-white border-b">
         <div className="max-w-6xl mx-auto px-2 py-2 flex items-center">
           <Link to="/" className="flex items-center gap-3">
-            <img src="/project_capital_logo.png" alt="logo" className="w-10 h-10 object-contain" />
+            <img src="/project_capital_v2.png" alt="logo" className="w-10 h-10 object-contain" />
             <span className="text-sm font-semibold">Project Capital</span>
           </Link>
           <div className="ml-auto">

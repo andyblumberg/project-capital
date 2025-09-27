@@ -6,6 +6,11 @@ export default function Profile() {
     <div className="min-h-screen bg-slate-50 p-8">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow p-6">
         <div className="flex items-center gap-6 mb-6">
+          <div>
+            <Link to="/" className="inline-flex items-center p-2 rounded hover:bg-slate-100">
+              <img src="/home.svg" alt="Home" className="w-6 h-6" />
+            </Link>
+          </div>
           <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center">
             <span className="text-xl font-semibold text-slate-500">AB</span>
           </div>

@@ -7,7 +7,7 @@ export default function Landing() {
       <header className="border-b bg-white">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <img src="/project_capital_logo.png" alt="Project Capital" className="w-12 h-12 object-contain" />
+            <img src="/project_capital_v2.png" alt="Project Capital" className="w-12 h-12 object-contain" />
             <span className="font-semibold text-lg">Project Capital</span>
           </div>
           <nav className="flex items-center gap-4">
@@ -21,7 +21,7 @@ export default function Landing() {
         {/* Hero */}
         <section className="grid grid-cols-1 md:grid-cols-2 items-center gap-8 mb-12">
           <div className="text-center md:text-left">
-            <img src="/project_capital_logo.png" alt="Project Capital" className="mx-auto md:mx-0 w-40 md:w-56 lg:w-72 mb-6" />
+            <img src="/project_capital_v2.png" alt="Project Capital" className="mx-auto md:mx-0 w-40 md:w-56 lg:w-72 mb-6" />
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4">Visualize capital flows. Get actionable insights.</h1>
             <p className="text-lg text-slate-600 mb-6">Project Capital is an interactive analytics demo that combines powerful D3 visualizations with AI-driven insights. Quickly explore data, customize dashboards, and generate narrative summaries.</p>
 
@@ -34,16 +34,16 @@ export default function Landing() {
           <div>
             <div className="grid grid-cols-2 gap-4">
               <div className="rounded-lg overflow-hidden shadow">
-                <img src="/project_capital_logo.png" alt="Sample 1" className="w-full h-48 object-cover bg-slate-100" />
+                <img src="/project_capital_v2.png" alt="Sample 1" className="w-full h-48 object-cover bg-slate-100" />
               </div>
               <div className="rounded-lg overflow-hidden shadow">
-                <img src="/project_capital_logo.png" alt="Sample 2" className="w-full h-48 object-cover bg-slate-100" />
+                <img src="/project_capital_v2.png" alt="Sample 2" className="w-full h-48 object-cover bg-slate-100" />
               </div>
               <div className="rounded-lg overflow-hidden shadow">
-                <img src="/project_capital_logo.png" alt="Sample 3" className="w-full h-48 object-cover bg-slate-100" />
+                <img src="/project_capital_v2.png" alt="Sample 3" className="w-full h-48 object-cover bg-slate-100" />
               </div>
               <div className="rounded-lg overflow-hidden shadow">
-                <img src="/project_capital_logo.png" alt="Sample 4" className="w-full h-48 object-cover bg-slate-100" />
+                <img src="/project_capital_v2.png" alt="Sample 4" className="w-full h-48 object-cover bg-slate-100" />
               </div>
             </div>
           </div>
@@ -75,7 +75,7 @@ export default function Landing() {
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="bg-white rounded-lg shadow overflow-hidden">
                 <div className="h-40 bg-slate-100 flex items-center justify-center">
-                  <img src="/project_capital_logo.png" alt={`Screenshot ${i + 1}`} className="w-24 h-24 opacity-70" />
+                  <img src="/project_capital_v2.png" alt={`Screenshot ${i + 1}`} className="w-24 h-24 opacity-70" />
                 </div>
                 <div className="p-3">
                   <div className="text-sm font-medium">Screenshot {i + 1}</div>
