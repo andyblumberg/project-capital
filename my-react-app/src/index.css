@@ -15,3 +15,8 @@ body {
   font-family: var(--app-font);
   margin: 0;
 }
+
+/* make padding/border count inside width/height calculations to avoid overflow */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
