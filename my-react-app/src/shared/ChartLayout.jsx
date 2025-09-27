@@ -9,6 +9,31 @@ export default function ChartLayout() {
   const [sending, setSending] = useState(false)
   const [reply, setReply] = useState('')
 
+  // handler for sending the textarea content to the backend
+  async function handleAsk() {
+    if (!textValue.trim()) return
+    setSending(true)
+    setReply('')
+    try {
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: textValue }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        setReply('Error: ' + (err.error || err.detail || 'unknown'))
+      } else {
+        const data = await res.json()
+        setReply(data.reply || '')
+      }
+    } catch (err) {
+      setReply('Network error: ' + String(err))
+    } finally {
+      setSending(false)
+    }
+  }
+
   useEffect(() => {
     const container = chartRef.current
     if (!container) return
@@ -85,22 +110,47 @@ export default function ChartLayout() {
         {/* right sidebar removed to keep layout single-column width */}
 
         
-        <aside className={`${sidebarOpen ? 'w-72' : 'w-14'} mr-6 transition-all duration-200 bg-slate-900 text-slate-50 rounded`}>
-          <div className="flex justify-end p-2">
+        <aside className={`${sidebarOpen ? 'w-80' : 'w-14'} mr-6 transition-all duration-200 bg-white text-slate-900 rounded shadow-sm flex flex-col` }>
+          <div className="flex items-center justify-between p-3 border-b">
+            <div className="flex items-center gap-3">
+              <h2 className="text-sm font-semibold">Transactions</h2>
+            </div>
             <button
-              className="text-2xl text-slate-200"
+              className="text-xl text-slate-600 px-2"
               onClick={() => setSidebarOpen((s) => !s)}
               aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
             >
               {sidebarOpen ? '‹' : '›'}
             </button>
           </div>
-          {sidebarOpen && (
-            <div className="p-4">
-              <h3 className="text-lg font-semibold">Controls</h3>
-              <p className="text-sm text-slate-300">Place filters or settings here.</p>
-              <button className="mt-3 px-3 py-2 bg-sky-600 text-white rounded" onClick={() => alert('Example action')}>Action</button>
+
+          {sidebarOpen ? (
+            <div className="p-3 overflow-auto flex-1">
+              {/* sample transactions */}
+              {[
+                { merchant: 'Starbucks', date: new Date(), amount: -4.75 },
+                { merchant: 'Acme Grocery', date: new Date(Date.now() - 86400000 * 1), amount: -42.12 },
+                { merchant: 'Payroll', date: new Date(Date.now() - 86400000 * 2), amount: 2500.0 },
+                { merchant: 'Uber', date: new Date(Date.now() - 86400000 * 3), amount: -12.3 },
+                { merchant: 'Apple', date: new Date(Date.now() - 86400000 * 4), amount: -199.0 },
+                { merchant: 'Interest', date: new Date(Date.now() - 86400000 * 5), amount: 3.21 },
+                { merchant: 'Electric Co.', date: new Date(Date.now() - 86400000 * 6), amount: -89.45 },
+              ].map((t, i) => (
+                <div key={i} className="flex items-center justify-between py-3 border-b last:border-b-0">
+                  <div>
+                    <div className="font-medium">{t.merchant}</div>
+                    <div className="text-xs text-slate-500">{t.date.toLocaleDateString()}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className={`font-semibold ${t.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {t.amount >= 0 ? '+' : '-'}${Math.abs(t.amount).toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
+          ) : (
+            <div className="p-2 flex items-center justify-center text-xs text-slate-600">Open</div>
           )}
         </aside>
 
@@ -109,82 +159,28 @@ export default function ChartLayout() {
           <div className="w-full max-w-6xl h-full min-h-0" ref={chartRef} />
         </div>
 
-        <aside className={`${sidebarOpen ? 'w-72' : 'w-14'} mr-6 transition-all duration-200 bg-slate-900 text-slate-50 rounded`}>
-          <div className="flex justify-end p-2">
-            <button
-              className="text-2xl text-slate-200"
-              onClick={() => setSidebarOpen((s) => !s)}
-              aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
-            >
-              {sidebarOpen ? '‹' : '›'}
-            </button>
-          </div>
-          {sidebarOpen && (
-            <div className="p-4">
-              <h3 className="text-lg font-semibold">Controls</h3>
-              <p className="text-sm text-slate-300">Place filters or settings here.</p>
-              <button className="mt-3 px-3 py-2 bg-sky-600 text-white rounded" onClick={() => alert('Example action')}>Action</button>
-            </div>
-          )}
-        </aside>
-
       </div>
 
       
 
-      <div className="border-t p-4" style={{height: 160}}>
-        <div className="flex gap-3 h-full">
+      <div className="border-t p-4" style={{ height: 160 }}>
+        <div className="h-full relative">
           <textarea
-            className="flex-1 h-full p-3 border rounded resize-none"
+            className="w-full h-full p-3 border rounded resize-none pr-16"
             value={textValue}
             onChange={(e) => setTextValue(e.target.value)}
             disabled={sending}
+            aria-label="Notes input"
           />
-          <div className="w-48 flex flex-col gap-2">
-            <button
-              className="px-3 py-2 bg-sky-600 text-white rounded"
-              onClick={async () => {
-                if (!textValue.trim()) return
-                setSending(true)
-                setReply('')
-                try {
-                  const res = await fetch('/api/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: textValue }),
-                  })
-                  if (!res.ok) {
-                    const err = await res.json().catch(() => ({}))
-                    setReply('Error: ' + (err.error || err.detail || 'unknown'))
-                  } else {
-                    const data = await res.json()
-                    setReply(data.reply || '')
-                  }
-                } catch (err) {
-                  setReply('Network error: ' + String(err))
-                } finally {
-                  setSending(false)
-                }
-              }}
-              disabled={sending}
-            >
-              {sending ? 'Sending...' : 'Ask'}
-            </button>
-            <button
-              className="px-3 py-2 bg-gray-200 rounded"
-              onClick={() => {
-                setTextValue('')
-                setReply('')
-              }}
-              disabled={sending}
-            >
-              Clear
-            </button>
-            {/* <div className="flex-1 overflow-auto bg-white p-2 border rounded">
-              <strong className="block mb-1">Assistant</strong>
-              <div className="text-sm whitespace-pre-wrap">{reply || <span className="text-slate-400">No response yet.</span>}</div>
-            </div> */}
-          </div>
+
+          <button
+            onClick={handleAsk}
+            disabled={sending}
+            aria-label="Send"
+            className={`absolute right-4 bottom-4 w-12 h-12 rounded-full flex items-center justify-center shadow-lg ${sending ? 'opacity-60 pointer-events-none' : 'bg-sky-600 text-white'}`}
+          >
+            <img src="/arrow-right.svg" alt="Send" className="w-5 h-5" />
+          </button>
         </div>
       </div>
     </div>
