@@ -10,7 +10,7 @@ async function talk_to_gemini(user_question) {
   return only the api call and nothing else.
 
   The available APIs are
-    1. project-capital.com/<user>/transactions/<category>
+    1. http://127.0.0.1:8000/transactions/<category>
       - <user> is the currently logged on user
       - <category> is one of "grocery" or "medical" 
 
@@ -24,6 +24,22 @@ async function talk_to_gemini(user_question) {
     contents: prompt + user_question,
   });
   console.log(response.candidates[0].content.parts[0].text);
+  return response.candidates[0].content.parts[0].text;
+}
+
+async function call_backend(endpoint) {
+  // We are using the JSONPlaceholder API for this example
+  const response = await fetch(endpoint);
+  
+  // Check if the response is successful
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
+  // Parse the JSON from the response
+  let r = await response.json()
+  console.log(r);
+  return r
 }
 
 
@@ -33,7 +49,7 @@ export default function ChartLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [textValue, setTextValue] = useState('Type notes here...')
   const [sending, setSending] = useState(false)
-  const [reply, setReply] = useState('')
+  const [reply, setReply] = useState([])
 
   useEffect(() => {
     const container = chartRef.current
@@ -57,20 +73,30 @@ export default function ChartLayout() {
         .attr('transform', `translate(${margin.left},${margin.top})`)
 
       // sample data
-      const now = new Date()
-      const data = d3.range(50).map((i) => ({
-        x: d3.timeDay.offset(now, -50 + i),
-        y: Math.sin(i / 5) * 20 + 50 + Math.random() * 10,
-      }))
+      let data = []
+      if (reply.length == 0) {
+        data = d3.range(50).map((i) => ({
+          x: 0,
+          y: 0,
+        }))
+      } else {
+        console.log("I hit this")
+        var parseTime = d3.timeParse("%Y-%m-%d");
+        reply.forEach((d) => data.push({
+          x: parseTime(d.date),
+          y: +d.close,
+        }))
+        console.log(data)
+      }
 
-      const x = d3.scaleTime().domain(d3.extent(data, (d) => d.x)).range([0, width])
-      const y = d3.scaleLinear().domain([0, d3.max(data, (d) => d.y) + 10]).range([height, 0])
+      var x = d3.scaleTime().range([0, width]);
+    var y = d3.scaleLinear().range([height, 0]);
 
-      const xAxis = d3.axisBottom(x).ticks(Math.min(10, data.length))
-      const yAxis = d3.axisLeft(y)
+    x.domain(d3.extent(data, (d) => { return d.x; }));
+    y.domain([0, d3.max(data, (d) => { return d.y; })]);
 
-      svg.append('g').attr('transform', `translate(0,${height})`).call(xAxis)
-      svg.append('g').call(yAxis)
+      svg.append('g').attr('transform', `translate(0,${height})`).call(d3.axisBottom(x))
+      svg.append('g').call(d3.axisLeft(y))
 
       const line = d3
         .line()
@@ -102,7 +128,7 @@ export default function ChartLayout() {
       ro.disconnect()
       d3.select(container).selectAll('svg').remove()
     }
-  }, [])
+  }, [reply])
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -172,7 +198,8 @@ export default function ChartLayout() {
               onClick={async () => {
                 if (!textValue.trim()) return
                 console.log(textValue)
-                talk_to_gemini(textValue)
+                let res = await talk_to_gemini(textValue)
+                setReply(await call_backend(res))
               }}
               disabled={sending}
             >
