@@ -1,5 +1,31 @@
 import React, { useEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
+import { GoogleGenAI } from "@google/genai";
+
+
+// The client gets the API key from the environment variable `GEMINI_API_KEY`.
+async function talk_to_gemini(user_question) {
+  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+  const prompt = `Convert the following prompt to a single API call, adhere to this format strictly do not add any extra query parameters. 
+  return only the api call and nothing else.
+
+  The available APIs are
+    1. project-capital.com/<user>/transactions/<category>
+      - <user> is the currently logged on user
+      - <category> is one of "grocery" or "medical" 
+
+    2. project-capital.com/<user>/account/balance
+      - <user> is the currently logged on user
+
+    prompt: `
+
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: prompt + user_question,
+  });
+  console.log(response.candidates[0].content.parts[0].text);
+}
+
 
 export default function ChartLayout() {
   const chartRef = useRef(null)
@@ -145,26 +171,8 @@ export default function ChartLayout() {
               className="px-3 py-2 bg-sky-600 text-white rounded"
               onClick={async () => {
                 if (!textValue.trim()) return
-                setSending(true)
-                setReply('')
-                try {
-                  const res = await fetch('/api/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: textValue }),
-                  })
-                  if (!res.ok) {
-                    const err = await res.json().catch(() => ({}))
-                    setReply('Error: ' + (err.error || err.detail || 'unknown'))
-                  } else {
-                    const data = await res.json()
-                    setReply(data.reply || '')
-                  }
-                } catch (err) {
-                  setReply('Network error: ' + String(err))
-                } finally {
-                  setSending(false)
-                }
+                console.log(textValue)
+                talk_to_gemini(textValue)
               }}
               disabled={sending}
             >
