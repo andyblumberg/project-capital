@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import * as d3 from 'd3'
 
 export default function ChartLayout() {
   const chartRef = useRef(null)
   const topRef = useRef(null)
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [textValue, setTextValue] = useState('Type notes here...')
+  const [textValue, setTextValue] = useState('Describe any insights or questions you have about your recent transactions...')
   const [sending, setSending] = useState(false)
   const [reply, setReply] = useState('')
 
@@ -106,11 +107,25 @@ export default function ChartLayout() {
   return (
     <div className="flex flex-col h-full overflow-hidden">
 
-    <div ref={topRef} className="flex-1 flex items-stretch p-6 min-h-0">
+      <header className="bg-white border-b">
+        <div className="max-w-6xl mx-auto px-2 py-2 flex items-center">
+          <Link to="/" className="flex items-center gap-3">
+            <img src="/project_capital_logo.png" alt="logo" className="w-10 h-10 object-contain" />
+            <span className="text-sm font-semibold">Project Capital</span>
+          </Link>
+          <div className="ml-auto">
+            <Link to="/profile" className="inline-flex items-center">
+              <img src="/user.svg" alt="Profile" className="w-9 h-9 rounded-full bg-slate-200 p-1" />
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      <div ref={topRef} className="flex-1 flex items-stretch p-6 min-h-0">
         {/* right sidebar removed to keep layout single-column width */}
 
         
-        <aside className={`${sidebarOpen ? 'w-80' : 'w-14'} mr-6 transition-all duration-200 bg-white text-slate-900 rounded shadow-sm flex flex-col` }>
+        <aside className={`${sidebarOpen ? 'w-80' : 'w-14'} mr-6 transition-all duration-200 bg-slate-50 text-slate-900 rounded shadow-sm flex flex-col` }>
           <div className="flex items-center justify-between p-3 border-b">
             <div className="flex items-center gap-3">
               <h2 className="text-sm font-semibold">Transactions</h2>
@@ -120,7 +135,7 @@ export default function ChartLayout() {
               onClick={() => setSidebarOpen((s) => !s)}
               aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
             >
-              {sidebarOpen ? '‹' : '›'}
+              {sidebarOpen ? '<' : '>'}
             </button>
           </div>
 
@@ -150,7 +165,15 @@ export default function ChartLayout() {
               ))}
             </div>
           ) : (
-            <div className="p-2 flex items-center justify-center text-xs text-slate-600">Open</div>
+            <div
+              className="p-2 flex items-center justify-center text-xs text-slate-600 cursor-pointer"
+              role="button"
+              tabIndex={0}
+              onClick={() => setSidebarOpen(true)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSidebarOpen(true) }}
+            >
+              Open
+            </div>
           )}
         </aside>
 

@@ -27,7 +27,7 @@ export default function Landing() {
 
             <div className="flex flex-col sm:flex-row items-center gap-3">
               <Link to="/login" className="inline-flex items-center justify-center px-6 py-3 bg-sky-600 text-white rounded-md shadow">Sign in</Link>
-              <Link to="/home" className="inline-flex items-center justify-center px-6 py-3 border border-slate-200 rounded-md text-slate-700">View demo</Link>
+              <Link to="/login?signup=1" className="inline-flex items-center justify-center px-6 py-3 border border-slate-200 rounded-md text-slate-700">Create account</Link>
             </div>
           </div>
 
