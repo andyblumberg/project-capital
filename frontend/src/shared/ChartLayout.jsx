@@ -154,13 +154,13 @@ export default function ChartLayout() {
             <div className="p-3 overflow-auto flex-1">
               {/* sample transactions */}
               {[
-                { merchant: 'Starbucks', date: new Date(), amount: -4.75 },
-                { merchant: 'Acme Grocery', date: new Date(Date.now() - 86400000 * 1), amount: -42.12 },
-                { merchant: 'Payroll', date: new Date(Date.now() - 86400000 * 2), amount: 2500.0 },
-                { merchant: 'Uber', date: new Date(Date.now() - 86400000 * 3), amount: -12.3 },
-                { merchant: 'Apple', date: new Date(Date.now() - 86400000 * 4), amount: -199.0 },
-                { merchant: 'Interest', date: new Date(Date.now() - 86400000 * 5), amount: 3.21 },
-                { merchant: 'Electric Co.', date: new Date(Date.now() - 86400000 * 6), amount: -89.45 },
+                { merchant: 'Starbucks', date: new Date(2027,8,1), amount: -4.75 },
+                { merchant: 'Acme Grocery', date: new Date(2027,8,1), amount: -42.12 },
+                { merchant: 'Payroll', date: new Date(2027,8,1), amount: 2500.0 },
+                { merchant: 'Uber', date: new Date(2027,8,1), amount: -12.3 },
+                { merchant: 'Apple', date: new Date(2027,8,1), amount: -199.0 },
+                { merchant: 'Interest', date: new Date(2027,8,1), amount: 3.21 },
+                { merchant: 'Electric Co.', date: new Date(2027,8,1), amount: -89.45 },
               ].map((t, i) => (
                 <div key={i} className="flex items-center justify-between py-3 border-b last:border-b-0">
                   <div>

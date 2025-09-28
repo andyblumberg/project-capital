@@ -143,29 +143,28 @@ function drawLineChart(container, widthPx, heightPx, data) {
 }
 
 function drawStackedBarChart(container, widthPx, heightPx, data) {
+    console.log("stacked " + data)
   d3.select(container).selectAll('svg').remove()
 
   const margin = { top: 20, right: 55, bottom: 40, left: 30 }
   const width = Math.max(200, widthPx) - margin.left - margin.right
   const height = Math.max(150, heightPx) - margin.top - margin.bottom
 
-//   const data = [
-//     {"x":"AL","stacked_val":"<10","y":598478},
-//     {"x":"AK","stacked_val":"<10","y":106741},
-//     {"x":"AZ","stacked_val":"<10","y":892083},
-//     {"x":"AR","stacked_val":"<10","y":392177},
-//     {"x":"CA","stacked_val":"<10","y":5038433},
-//     {"x":"AL","stacked_val":"10-19","y":257610},
-//     {"x":"AK","stacked_val":"10-19","y":360263},
-//     {"x":"AZ","stacked_val":"10-19","y":167495},
-//     {"x":"AR","stacked_val":"10-19","y":360263},
-//     {"x":"CA","stacked_val":"10-19","y":167495},
-//     {"x":"AL","stacked_val":"20-29","y":218684},
-//     {"x":"AK","stacked_val":"20-29","y":1789739},
-//     {"x":"AZ","stacked_val":"20-29","y":905590},
-//     {"x":"AR","stacked_val":"20-29","y":419456},
-//     {"x":"CA","stacked_val":"20-29","y":167495},
-//   ]
+  let formattedData = []
+  for (let i=0; i<data.length; ++i) {
+    let recDate = data[i].date
+    Object.keys(data[i]).forEach(key => {
+        console.log("key " + key)
+        if (key !== 'date') {
+            formattedData.push({"x": recDate, "stacked_val": key, "y": -1 * data[i][key]})
+        }
+    });
+  }
+
+  data = formattedData
+
+  console.log("formatted")
+  console.log(data)
 
   // Determine the series that need to be stacked.
   const series = d3.stack()
@@ -183,6 +182,7 @@ function drawStackedBarChart(container, widthPx, heightPx, data) {
       .domain([0, d3.max(series, d => d3.max(d, d => d[1]))])
       .rangeRound([height - margin.bottom, margin.top]);
 
+      console.log(d3.schemeSpectral)
   const color = d3.scaleOrdinal()
       .domain(series.map(d => d.key))
       .range(d3.schemeSpectral[series.length])
