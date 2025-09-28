@@ -1,20 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import * as d3 from 'd3'
+import { GoogleGenAI } from "@google/genai";
+import ClipLoader from "react-spinners/ClipLoader";
+
+import { drawStackedBarChart, drawLineChart, drawPieChart } from './utils';
 
 // The client gets the API key from the environment variable `GEMINI_API_KEY`.
 async function talk_to_gemini(user_question) {
   const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
-  const prompt = `Convert the following prompt to a single API call, adhere to this format strictly do not add any extra query parameters. 
+  const prompt = `Pick on of the following API interfaces and return an API call for the prompt provided below, adhere to this format strictly do not add any extra query parameters. 
   return only the api call and nothing else.
 
   The available APIs are
-    1. http://127.0.0.1:8000/transactions/<category>
-      - <user> is the currently logged on user
-      - <category> is one of "grocery" or "medical" 
+    1. http://127.0.0.1:8000/100001/spending/percategory?start_date=<1>&end_date=<2>
+      - This api call is for obtaining the percategory expenditure of a user
+      - <1> should be the start date in YYYY-MM-DD
+      - <2> should be the end date in YYYY-MM-DD
 
-    2. project-capital.com/<user>/account/balance
-      - <user> is the currently logged on user
+    2. http://127.0.0.1:8000/100001/spending/percategory/all
+      - This api call is for obtaining the percategory expenditure of a user
 
     prompt: `
 
@@ -45,7 +50,8 @@ export default function ChartLayout() {
   const chartRef = useRef(null)
   const topRef = useRef(null)
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [textValue, setTextValue] = useState('Describe any insights or questions you have about your recent transactions...')
+  const [textValue, setTextValue] = useState('')
+  const [queried, setQueried] = useState('')
   const [sending, setSending] = useState(false)
   const [reply, setReply] = useState([])
 
@@ -69,6 +75,10 @@ export default function ChartLayout() {
       ro.disconnect()
       d3.select(container).selectAll('svg').remove()
     }
+  }, [])
+
+  useEffect(() => {
+    
   }, [])
 
   return (
@@ -95,7 +105,7 @@ export default function ChartLayout() {
         <aside className={`${sidebarOpen ? 'w-80' : 'w-14'} mr-6 transition-all duration-200 bg-slate-50 text-slate-900 rounded shadow-sm flex flex-col` }>
           <div className="flex items-center justify-between p-3 border-b">
             <div className="flex items-center gap-3">
-              <h2 className="text-sm font-semibold">Transactions</h2>
+              <h2 className="text-sm font-semibold">{sidebarOpen ? 'Transactions' : ''}</h2>
             </div>
             <button
               className="text-xl text-slate-600 px-2"
@@ -132,23 +142,26 @@ export default function ChartLayout() {
               ))}
             </div>
           ) : (
-            <div
-              className="p-2 flex items-center justify-center text-xs text-slate-600 cursor-pointer"
-              role="button"
-              tabIndex={0}
-              onClick={() => setSidebarOpen(true)}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSidebarOpen(true) }}
-            >
-              Open
-            </div>
+            <div></div>
           )}
         </aside>
-
-        <div className="flex-1 flex items-center justify-center min-h-0">
+        
+        <div className="flex-col flex-1 items-center justify-center w-full max-w-6xl">
+          {queried? (<div className="w-full max-w-6xl"><span>{queried} {"    "}  <ClipLoader
+        loading={sending}
+        size={20}
+        aria-label="Loading Spinner"
+        data-testid="loader"
+      /></span></div>) : <div></div>}
           {/* chart container: full height of top area, will be observed for sizing */}
-          <div className="w-full max-w-6xl h-full min-h-0" ref={chartRef} />
+          
+        <div className="w-full max-w-6xl h-full min-h-0" ref={chartRef} />
+          
         </div>
+          
+      </div>
 
+      <div>
       </div>
 
       
@@ -161,14 +174,19 @@ export default function ChartLayout() {
             onChange={(e) => setTextValue(e.target.value)}
             disabled={sending}
             aria-label="Notes input"
+            placeholder='Describe any insights or questions you have about your recent transactions...'
           />
 
           <button
             onClick={async () => {
                 if (!textValue.trim()) return
-                console.log(textValue)
+                setSending(true)
+                setQueried(textValue)
+                setTextValue('')
                 let res = await talk_to_gemini(textValue)
+                
                 setReply(await call_backend(res))
+                setSending(false)
               }}
             disabled={sending}
             aria-label="Send"
