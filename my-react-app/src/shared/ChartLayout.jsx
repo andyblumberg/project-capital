@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import * as d3 from 'd3'
-import { drawLineChart, drawPieChart } from './utils'
+import { drawLineChart, drawPieChart, drawStackedBarChart } from './utils'
 
 export default function ChartLayout() {
   const chartRef = useRef(null)
@@ -43,14 +43,14 @@ export default function ChartLayout() {
     // use ResizeObserver on the chart container so the chart sizes to its available area
     const ro = new ResizeObserver(() => {
       const rect = container.getBoundingClientRect()
-      drawPieChart(container, rect.width, rect.height)
+      drawStackedBarChart(container, rect.width, rect.height)
     })
 
     ro.observe(container)
 
     // initial draw
     const rect = container.getBoundingClientRect()
-    drawPieChart(container, rect.width, rect.height)
+    drawStackedBarChart(container, rect.width, rect.height)
 
     return () => {
       ro.disconnect()

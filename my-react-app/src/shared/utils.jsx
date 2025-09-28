@@ -138,4 +138,91 @@ function drawLineChart(container, widthPx, heightPx) {
     .attr('d', line)
 }
 
-export {drawPieChart, drawLineChart};
+function drawStackedBarChart(container, widthPx, heightPx) {
+  d3.select(container).selectAll('svg').remove()
+
+  const margin = { top: 20, right: 55, bottom: 40, left: 30 }
+  const width = Math.max(200, widthPx) - margin.left - margin.right
+  const height = Math.max(150, heightPx) - margin.top - margin.bottom
+
+  const data = [
+    {"x":"AL","stacked_val":"<10","y":598478},
+    {"x":"AK","stacked_val":"<10","y":106741},
+    {"x":"AZ","stacked_val":"<10","y":892083},
+    {"x":"AR","stacked_val":"<10","y":392177},
+    {"x":"CA","stacked_val":"<10","y":5038433},
+    {"x":"AL","stacked_val":"10-19","y":257610},
+    {"x":"AK","stacked_val":"10-19","y":360263},
+    {"x":"AZ","stacked_val":"10-19","y":167495},
+    {"x":"AR","stacked_val":"10-19","y":360263},
+    {"x":"CA","stacked_val":"10-19","y":167495},
+    {"x":"AL","stacked_val":"20-29","y":218684},
+    {"x":"AK","stacked_val":"20-29","y":1789739},
+    {"x":"AZ","stacked_val":"20-29","y":905590},
+    {"x":"AR","stacked_val":"20-29","y":419456},
+    {"x":"CA","stacked_val":"20-29","y":167495},
+  ]
+
+  // Determine the series that need to be stacked.
+  const series = d3.stack()
+      .keys(d3.union(data.map(d => d.stacked_val))) // distinct series keys, in input order
+      .value(([, group], key) => group.get(key).y) // get value for each series key and stack
+    (d3.index(data, d => d.x, d => d.stacked_val)); // group by stack then series key
+
+  // Prepare the scales for positional and color encodings.
+  const x = d3.scaleBand()
+      .domain(d3.groupSort(data, D => -d3.sum(D, d => d.y), d => d.x))
+      .range([margin.left, width - margin.right])
+      .padding(0.1);
+
+  const y = d3.scaleLinear()
+      .domain([0, d3.max(series, d => d3.max(d, d => d[1]))])
+      .rangeRound([height - margin.bottom, margin.top]);
+
+  const color = d3.scaleOrdinal()
+      .domain(series.map(d => d.key))
+      .range(d3.schemeSpectral[series.length])
+      .unknown("#ccc");
+
+    // A function to format the value in the tooltip.
+    const formatValue = x => isNaN(x) ? "N/A" : x.toLocaleString("en")
+
+    // Create the SVG container.
+    const svg = d3
+        .select(container)
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("viewBox", [0, 0, width, height])
+        .attr("style", "max-width: 100%; height: auto;");
+
+    // Append a group for each series, and a rect for each element in the series.
+    svg.append("g")
+      .selectAll()
+      .data(series)
+      .join("g")
+        .attr("fill", d => color(d.key))
+      .selectAll("rect")
+      .data(D => D.map(d => (d.key = D.key, d)))
+      .join("rect")
+        .attr("x", d => x(d.data[0]))
+        .attr("y", d => y(d[1]))
+        .attr("height", d => y(d[0]) - y(d[1]))
+        .attr("width", x.bandwidth())
+      .append("title")
+        .text(d => `${d.data[0]} ${d.key}\n${formatValue(d.data[1].get(d.key).y)}`);
+
+    // Append the horizontal axis.
+    svg.append("g")
+        .attr("transform", `translate(0,${height - margin.bottom})`)
+        .call(d3.axisBottom(x).tickSizeOuter(0))
+        .call(g => g.selectAll(".domain").remove());
+
+    // Append the vertical axis.
+    svg.append("g")
+        .attr("transform", `translate(${margin.left},0)`)
+        .call(d3.axisLeft(y).ticks(null, "s"))
+        .call(g => g.selectAll(".domain").remove());
+}
+
+export {drawPieChart, drawLineChart, drawStackedBarChart};
