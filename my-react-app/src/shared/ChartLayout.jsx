@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import * as d3 from 'd3'
+import { drawLineChart, drawPieChart } from './utils'
 
 export default function ChartLayout() {
   const chartRef = useRef(null)
@@ -39,64 +40,17 @@ export default function ChartLayout() {
     const container = chartRef.current
     if (!container) return
 
-    const margin = { top: 20, right: 20, bottom: 40, left: 50 }
-
-    function draw(widthPx, heightPx) {
-      d3.select(container).selectAll('svg').remove()
-
-      const width = Math.max(200, widthPx) - margin.left - margin.right
-      const height = Math.max(150, heightPx) - margin.top - margin.bottom
-
-      const svg = d3
-        .select(container)
-        .append('svg')
-        .attr('width', width + margin.left + margin.right)
-        .attr('height', height + margin.top + margin.bottom)
-        .attr('viewBox', `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
-        .append('g')
-        .attr('transform', `translate(${margin.left},${margin.top})`)
-
-      // sample data
-      const now = new Date()
-      const data = d3.range(50).map((i) => ({
-        x: d3.timeDay.offset(now, -50 + i),
-        y: Math.sin(i / 5) * 20 + 50 + Math.random() * 10,
-      }))
-
-      const x = d3.scaleTime().domain(d3.extent(data, (d) => d.x)).range([0, width])
-      const y = d3.scaleLinear().domain([0, d3.max(data, (d) => d.y) + 10]).range([height, 0])
-
-      const xAxis = d3.axisBottom(x).ticks(Math.min(10, data.length))
-      const yAxis = d3.axisLeft(y)
-
-      svg.append('g').attr('transform', `translate(0,${height})`).call(xAxis)
-      svg.append('g').call(yAxis)
-
-      const line = d3
-        .line()
-        .x((d) => x(d.x))
-        .y((d) => y(d.y))
-
-      svg
-        .append('path')
-        .datum(data)
-        .attr('fill', 'none')
-        .attr('stroke', '#2b6cb0')
-        .attr('stroke-width', 2)
-        .attr('d', line)
-    }
-
     // use ResizeObserver on the chart container so the chart sizes to its available area
     const ro = new ResizeObserver(() => {
       const rect = container.getBoundingClientRect()
-      draw(rect.width, rect.height)
+      drawPieChart(container, rect.width, rect.height)
     })
 
     ro.observe(container)
 
     // initial draw
     const rect = container.getBoundingClientRect()
-    draw(rect.width, rect.height)
+    drawPieChart(container, rect.width, rect.height)
 
     return () => {
       ro.disconnect()
