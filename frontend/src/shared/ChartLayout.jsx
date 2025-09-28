@@ -21,13 +21,13 @@ async function talk_to_gemini(user_question) {
 
     2. http://127.0.0.1:8000/100001/spending/category/selectcategories/cummulative?[categories=<category>]&start_date=<1>&end_date=<2>
       - This api call is for obtaining the PER DAY PER CATEGORY EXPENDITURE for a specified number of categories within a given date range
-      - [categories=<category>] should be replaced with a & seperated categories=<K> where K can be one of food, entertainment, utilities, transportation, shopping, miscellaneous, housing, education, healthcare
+      - [categories=<category>] should be replaced with a & seperated categories=<K> where K can be one of food, entertainment, utilities, transportation, shopping, miscellaneous, housing, education, healthcare.
       - <1> should be the start date in YYYY-MM-DD, if this isnt available in prompt assume 2027-01-01
       - <2> should be the end date in YYYY-MM-DD, if this isnt available in prompt assume 2027-12-31
 
-    3. http://127.0.0.1:8000/100001/spending/category/cummulative?[categories=<category>]&start_date=<1>&end_date=<2>
-      - This api call is for obtaining the PER DAY TOTAL EXPENDITURE for a specified number of categories within a given date range
-      - [categories=<category>] should be replaced with a & seperated categories=<K> where K can be one of food, entertainment, utilities, transportation, shopping, miscellaneous, housing, education, healthcare
+    4. http://127.0.0.1:8000/100001/spending/category/cummulative?[categories=<category>]&start_date=<1>&end_date=<2>
+      - This api call is for obtaining THE TOTAL COMBINED PER DAY EXPENDITURE for a specified number of categories within a given date range
+      - [categories=<category>] should be replaced with a & seperated categories=<K> where K can be one of food, entertainment, utilities, transportation, shopping, miscellaneous, housing, education, healthcare. Defaults to all of the categories.
       - <1> should be the start date in YYYY-MM-DD, if this isnt available in prompt assume 2027-01-01
       - <2> should be the end date in YYYY-MM-DD, if this isnt available in prompt assume 2027-12-31
 
