@@ -217,10 +217,10 @@ function drawStackedBarChart(container, widthPx, heightPx, data) {
         .text(d => `${d.data[0]} ${d.key}\n${formatValue(d.data[1].get(d.key).y)}`);
 
     // Append the horizontal axis.
-    svg.append("g")
-        .attr("transform", `translate(0,${height - margin.bottom})`)
-        .call(d3.axisBottom(x).tickSizeOuter(0))
-        .call(g => g.selectAll(".domain").remove());
+    // svg.append("g")
+    //     .attr("transform", `translate(0,${height - margin.bottom})`)
+    //     .call(d3.axisBottom(x).tickSizeOuter(0))
+    //     .call(g => g.selectAll(".domain").remove());
 
     // Append the vertical axis.
     svg.append("g")
