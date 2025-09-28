@@ -13,13 +13,23 @@ async function talk_to_gemini(user_question) {
   return only the api call and nothing else.
 
   The available APIs are
-    1. http://127.0.0.1:8000/100001/spending/percategory?start_date=<1>&end_date=<2>
-      - This api call is for obtaining the percategory expenditure of a user
-      - <1> should be the start date in YYYY-MM-DD
-      - <2> should be the end date in YYYY-MM-DD
+    1. http://127.0.0.1:8000/100001/spending/selectcategories?[categories=<category>]&start_date=<1>&end_date=<2>
+      - This api call is for obtaining the TOTAL PER CATEGORY EXPENDITURE for a specified number of categories within a given date range
+      - [categories=<category>] should be replaced with a & seperated categories=<K> where K can be one of food, entertainment, utilities, transportation, shopping, miscellaneous, housing, education, healthcare
+      - <1> should be the start date in YYYY-MM-DD, if this isnt available in prompt assume 2027-01-01
+      - <2> should be the end date in YYYY-MM-DD, if this isnt available in prompt assume 2027-12-31
 
-    2. http://127.0.0.1:8000/100001/spending/percategory/all
-      - This api call is for obtaining the percategory expenditure of a user
+    2. http://127.0.0.1:8000/100001/spending/category/selectcategories/cummulative?[categories=<category>]&start_date=<1>&end_date=<2>
+      - This api call is for obtaining the PER DAY PER CATEGORY EXPENDITURE for a specified number of categories within a given date range
+      - [categories=<category>] should be replaced with a & seperated categories=<K> where K can be one of food, entertainment, utilities, transportation, shopping, miscellaneous, housing, education, healthcare
+      - <1> should be the start date in YYYY-MM-DD, if this isnt available in prompt assume 2027-01-01
+      - <2> should be the end date in YYYY-MM-DD, if this isnt available in prompt assume 2027-12-31
+
+    3. http://127.0.0.1:8000/100001/spending/category/cummulative?[categories=<category>]&start_date=<1>&end_date=<2>
+      - This api call is for obtaining the PER DAY TOTAL EXPENDITURE for a specified number of categories within a given date range
+      - [categories=<category>] should be replaced with a & seperated categories=<K> where K can be one of food, entertainment, utilities, transportation, shopping, miscellaneous, housing, education, healthcare
+      - <1> should be the start date in YYYY-MM-DD, if this isnt available in prompt assume 2027-01-01
+      - <2> should be the end date in YYYY-MM-DD, if this isnt available in prompt assume 2027-12-31
 
     prompt: `
 
@@ -27,7 +37,7 @@ async function talk_to_gemini(user_question) {
     model: "gemini-2.5-flash",
     contents: prompt + user_question,
   });
-  console.log(response.candidates[0].content.parts[0].text);
+  console.log("Gemini response: " + response.candidates[0].content.parts[0].text);
   return response.candidates[0].content.parts[0].text;
 }
 
@@ -42,8 +52,21 @@ async function call_backend(endpoint) {
   
   // Parse the JSON from the response
   let r = await response.json()
-  console.log(r);
+  console.log("Backend response: " + r);
   return r
+}
+
+function pick_chart_type(endpoint) {
+  const res = endpoint.split('?')
+  console.log(res)
+  if (res[0] === "http://127.0.0.1:8000/100001/spending/selectcategories")
+    return 'pie'
+  else if(res[0] === "http://127.0.0.1:8000/100001/spending/category/selectcategories/cummulative")
+    return 'bar'
+  else if(res[0] === "http://127.0.0.1:8000/100001/spending/category/cummulative")
+    return 'line'
+  else
+    return ''
 }
 
 export default function ChartLayout() {
@@ -54,32 +77,43 @@ export default function ChartLayout() {
   const [queried, setQueried] = useState('')
   const [sending, setSending] = useState(false)
   const [reply, setReply] = useState([])
+  const [chartType, setChartType] = useState('')
 
   useEffect(() => {
     const container = chartRef.current
     if (!container) return
 
+    if(reply.length == 0 || chartType.length == 0)
+        return
+
     // use ResizeObserver on the chart container so the chart sizes to its available area
     const ro = new ResizeObserver(() => {
       const rect = container.getBoundingClientRect()
-      drawStackedBarChart(container, rect.width, rect.height)
+      
+      if (chartType === 'line')
+        drawLineChart(container, rect.width, rect.height, reply)
+      else if (chartType === 'pie')
+        drawPieChart(container, rect.width, rect.height, reply)
+      else
+        drawStackedBarChart(container, rect.width, rect.height, reply)
     })
 
     ro.observe(container)
 
     // initial draw
     const rect = container.getBoundingClientRect()
-    drawStackedBarChart(container, rect.width, rect.height)
+    if (chartType === 'line')
+        drawLineChart(container, rect.width, rect.height, reply)
+      else if (chartType === 'pie')
+        drawPieChart(container, rect.width, rect.height, reply)
+      else
+        drawStackedBarChart(container, rect.width, rect.height, reply)
 
     return () => {
       ro.disconnect()
       d3.select(container).selectAll('svg').remove()
     }
-  }, [])
-
-  useEffect(() => {
-    
-  }, [])
+  }, [reply]);
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -184,7 +218,7 @@ export default function ChartLayout() {
                 setQueried(textValue)
                 setTextValue('')
                 let res = await talk_to_gemini(textValue)
-                
+                setChartType(pick_chart_type(res))
                 setReply(await call_backend(res))
                 setSending(false)
               }}
