@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* preserve some base variables from previous index.css */
+:root {
+  --app-font: system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--app-font);
+  margin: 0;
+}
+
+/* make padding/border count inside width/height calculations to avoid overflow */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
